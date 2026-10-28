@@ -2,7 +2,7 @@
 Starts the Mote MCP server for one call, speaks JSON-RPC over stdio, prints the result, and logs the call."""
 import json, os, subprocess, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.environ.get("MOTE_DATA", os.path.join(HERE, "data_real"))
+DATA = os.environ.get("MOTE_DATA", os.path.join(HERE, "data"))
 
 def talk(messages):
     p = subprocess.Popen([sys.executable, os.path.join(HERE, "mote_mcp.py"), "--data", DATA], stdin=subprocess.PIPE,

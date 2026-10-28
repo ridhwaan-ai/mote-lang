@@ -149,5 +149,5 @@ def serve(server):
 
 if __name__ == "__main__":
     a = sys.argv
-    data = a[a.index("--data") + 1] if "--data" in a else os.path.join(HERE, "data_demo")
+    data = a[a.index("--data") + 1] if "--data" in a else os.path.join(HERE, "data")
     serve(Server(data, "--allow-writes" in a, db=a[a.index("--db") + 1] if "--db" in a else None))

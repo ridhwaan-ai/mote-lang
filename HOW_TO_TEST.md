@@ -1,16 +1,20 @@
-# How to test Mote yourself (and watch Claude use it)
+# How to try Mote yourself
+
+Needs Python 3.10+ and `pip install pandas numpy` (add `duckdb` for the database mode).
 
 ## 1. Open the app
-Double-click **START_MOTE_APP.bat** in this folder. A page opens at http://127.0.0.1:8765.
-It runs on a SANDBOX copy of your trading logs (`data_demo`), so nothing real can be damaged.
-Close the black window to stop it.
+```
+python mote_app.py serve --data data
+```
+A page opens at http://127.0.0.1:8765 on the included sample data (`data/`: tickets, agents, esc). Stop it with Ctrl+C.
 
 ## 2. Try these (copy into the Program box, press Run)
 Read:
-- `@history|G(acct,S:usd)|O(v)`            profit per account
-- `@history|A(wd=weekday(close_utc))|G(wd,S:usd)|O(v)`   which weekday loses most
-- `@history|SD(usd)`                        how spread out results are
-- `@outcomes|F(symbol~"xau")|C`             text search, any capitalisation
+- `@tickets|C`                              how many rows
+- `@tickets|G(team,S:hours)|O(v)`           hours per team
+- `@tickets|F(prio==1)|C`                   count of priority-1 tickets
+- `@tickets|F(status~"clo")|C`              text search, any capitalisation
+- `@tickets|SD(hours)`                      how spread out the hours are
 
 Change data (these only PREVIEW until you tick "Save changes to disk"):
 - `I(shopping,id,item,bought)`              create a table
@@ -20,18 +24,16 @@ Change data (these only PREVIEW until you tick "Save changes to disk"):
 - `-shopping`                               delete the table
 
 Make Mote refuse (this is the point of it):
-- `@history|A(x=hold_min*2)|C`              blank number, it stops and tells you how to fix it
-- `@history|A(x=usd+acct)|C`                text in maths, it stops
+- `@tickets|A(x=hours+team)|C`              text in maths, it stops and tells you how to fix it
 
-Undo a mistake: every overwrite or delete keeps a copy in `data_demo\_backups`.
-From a terminal:  `C:\Python314\python.exe mote_app.py restore shopping --data data_demo`
+Undo a mistake: every overwrite or delete keeps a copy in `data/_backups`.
+From a terminal: `python mote_app.py restore shopping --data data`
 
-## 3. Watch Claude use it
-- Ask Claude in this chat for any question about the data. Claude runs the Mote program through the app and shows you the program, the result and the log line.
-- Every run is saved. The "Recent runs" box on the page shows who ran it: `[you]` or `[claude]`.
-- Full history: `mote_log.jsonl` (one line per run: time, who, program, result fingerprint, changes).
-- To replay a scripted demo of everything: `C:\Python314\python.exe demo.py`
+## 3. Let an agent use it
+See `CONNECT_AGENTS.md`. Every run is logged in `mote_log.jsonl` (time, who ran it, program, changes).
+
+## Automated tests
+Run any `test_*.py` file, for example `python test_write.py` or `python test_recon.py`.
 
 ## What Mote cannot do yet (be honest)
-Only CSV files, one computer, no passwords or users, no huge data (tested to 100,000 rows), no
-automatic scheduling. It is a working prototype, not a finished product.
+No users or passwords, no automatic scheduling, no Postgres yet, and no independent security review. It is an early prototype.
