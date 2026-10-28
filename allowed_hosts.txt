@@ -1,0 +1,2 @@
+# Hosts that Mote web steps (@get, PT) may call, one per line. Empty = no web access.
+# Example line:  api.mycompany.com

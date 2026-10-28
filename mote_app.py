@@ -1,6 +1,6 @@
 """Mote app v0.5 - loads CSVs into columns, runs Mote programs (reads and writes), logs every run.
 
-  python mote_app.py serve [--data data] [--port 8765]   open http://127.0.0.1:8765
+  python mote_app.py serve [--data data] [--port 8765]   open 127.0.0.1:8765 in a browser
   python mote_app.py run "@tickets|C" [--data data]      one-off from the command line (changes are PREVIEW only)
   python mote_app.py run "..." --apply [--who name]      really save create/insert/update/delete changes (backup kept)
   python mote_app.py run-file prog.mote [--data d]       run a program saved in a file (no shell escaping to worry about)
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     store = Store(os.path.abspath(arg("--data", os.path.join(HERE, "data"))))
     if len(sys.argv) > 1 and sys.argv[1] == "serve":
         port = int(arg("--port", 8765))
-        print(f"Mote app on http://127.0.0.1:{port}  data: {store.folder}")
+        print(f"Mote app on 127.0.0.1:{port}  data: {store.folder}")
         ThreadingHTTPServer(("127.0.0.1", port), make_handler(store)).serve_forever()
     elif len(sys.argv) > 2 and sys.argv[1] == "run":
         r = run_program(sys.argv[2], store, apply="--apply" in sys.argv, who=arg("--who", "cli"))

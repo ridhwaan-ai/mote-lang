@@ -4,7 +4,9 @@ Program = lines. Each line: [name=] step | step | step
 Last line's result is the output. Steps are checked: unknown fields,
 wrong input type, or bad arguments stop the run with a clear error.
 """
+import ast
 import datetime
+import operator
 import re
 
 
@@ -142,7 +144,35 @@ def arith(expr, row):
     for n in names:
         if n not in row:
             raise MoteError(f"A: unknown field '{n}'. fields: {sorted(row)}")
-    return eval(expr, {"__builtins__": {}}, dict(row))
+    return _arith(expr, row)
+
+
+_BIN = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv,
+        ast.Mod: operator.mod, ast.Pow: operator.pow}
+
+
+def _arith(expr, row):
+    """Numbers, field names, + - * / % ** and brackets only. Nothing else is evaluated."""
+    def go(n):
+        if isinstance(n, ast.Expression):
+            return go(n.body)
+        if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)) and not isinstance(n.value, bool):
+            return n.value
+        if isinstance(n, ast.Name) and n.id in row:
+            return row[n.id]
+        if isinstance(n, ast.UnaryOp) and isinstance(n.op, (ast.USub, ast.UAdd)):
+            v = go(n.operand)
+            return -v if isinstance(n.op, ast.USub) else v
+        if isinstance(n, ast.BinOp) and type(n.op) in _BIN:
+            a, b = go(n.left), go(n.right)
+            if isinstance(n.op, ast.Pow) and abs(b) > 64:
+                raise MoteError("A: exponent too large (limit 64)")
+            return _BIN[type(n.op)](a, b)
+        raise MoteError(f"A: bad expression '{expr}'")
+    try:
+        return go(ast.parse(expr.strip(), mode="eval"))
+    except SyntaxError:
+        raise MoteError(f"A: bad expression '{expr}'")
 
 
 AGG = {

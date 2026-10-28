@@ -43,10 +43,10 @@ Remove it any time: `claude mcp remove mote`.
 
 ## Try it by hand (no agent needed)
 ```
-python mcp_call.py --list
-python mcp_call.py mote_run "{\"program\": \"@tickets|C\"}"
+python mote_run.py data "@tickets|C"
+python mote_run.py data "@tickets|G(team,S:hours)|O(v)"
 ```
-(`mcp_call.py` reads `data`; set the MOTE_DATA environment variable to use another folder.)
+(`mote_run.py` takes the data folder first. Changes only preview unless you add `--apply`.)
 
 ## On a real database instead of CSV files (DuckDB or SQLite)
 ```

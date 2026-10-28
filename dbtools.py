@@ -1,7 +1,7 @@
-"""Pick the database for the comparison tests: set MOTE_DB=duckdb (default sqlite)."""
-import os
+"""Pick the database for the comparison tests: pass `duckdb` on the command line (default sqlite)."""
+import sys
 
-ENGINE = os.environ.get("MOTE_DB", "sqlite")
+ENGINE = "duckdb" if "duckdb" in sys.argv[1:] else "sqlite"
 
 
 def connect(path=":memory:"):

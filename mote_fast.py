@@ -462,7 +462,7 @@ def _step(sym, arg, cur, env, first):
         return _load(mote_flow.reconcile(cur, _load(env[args[0][1:]]), tol, split))
     if sym in ("WF", "PT"):
         if len(args) != 1:
-            raise MoteError({"WF": 'WF: needs one quoted file name, e.g. WF("reports/out.csv")', "PT": 'PT: needs one quoted web address, e.g. PT("http://localhost:8080/report")'}[sym])
+            raise MoteError({"WF": 'WF: needs one quoted file name, e.g. WF("reports/out.csv")', "PT": 'PT: needs one quoted web address, e.g. PT("<url on an allowed host>/report")'}[sym])
         if isinstance(cur, pd.DataFrame) is False and not isinstance(cur, (str, int, float, bool, np.generic)):
             raise MoteError(f"{sym}: nothing to send")
         target = mote_flow.quoted(args[0], f"{sym} target")

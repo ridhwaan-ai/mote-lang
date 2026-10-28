@@ -15,8 +15,8 @@ Mote is short, has clear error messages that tell the agent how to fix the line,
 - **Read-only by default.** The MCP server cannot change anything unless started with `--allow-writes`.
 - **Preview first.** Every change shows what it would do; nothing is saved until `apply`.
 - **Backups.** Every applied change to a table or file keeps a restorable backup (`mote_restore`).
-- **Fenced effects.** Writing files is limited to safe extensions inside the data folder; web calls only go to hosts you list (`MOTE_NET_HOSTS`); post count and size limits.
-- **No code execution.** Expressions are evaluated by a restricted evaluator, not `eval`.
+- **Fenced effects.** Writing files is limited to safe extensions inside the data folder; web calls only go to hosts you list in `allowed_hosts.txt` (none by default); post count and size limits.
+- **No `eval`/`exec`.** Expressions are parsed into a syntax tree and only numbers, field names, + - * / % ** and brackets are evaluated. (An earlier build used a fenced `eval` in the reference engine; it was replaced with the tree evaluator in 0.1.1.)
 - **Injection tests.** 33 automated checks (hostile strings stored as plain data, no escaped writes).
 - **Audit log.** Every run is logged with who ran it.
 

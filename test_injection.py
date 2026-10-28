@@ -1,6 +1,6 @@
 """Attack tests: program text comes from agents, so try to make the generated SQL do something it should not.
 Every attempt must either be stored/compared as plain text or be refused. Tables and secrets must stay untouched.
-Run on both databases:  python test_injection.py   and   MOTE_DB=duckdb python test_injection.py"""
+Run on both databases:  python test_injection.py   and   python test_injection.py duckdb"""
 import pandas as pd
 
 import mote

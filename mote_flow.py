@@ -3,7 +3,7 @@
 Sources (start a line):  @json("file")  @text("file")  @dir("folder")  @get("url"[,tries])  @const("a","b",...)
 Steps:  EX(f) one row per item of list field f | RX(f,"regex",new) one row per match | SP(f,"sep",new) one row per part
         GT("url/{field}",prefix[,tries]) fetch JSON per row | LG(f) previous row's value | TX(f) join a field into one text value
-Files stay inside the data folder; web calls only go to hosts listed in MOTE_NET_HOSTS (default: this computer).
+Files stay inside the data folder; web calls only go to hosts listed in allowed_hosts.txt (default: none).
 """
 import datetime
 import json
@@ -63,13 +63,26 @@ def frame(rows):
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 
+ALLOWED_HOSTS = []   # hosts web steps may call; none by default
+
+
+def allowed_hosts():
+    """Hosts listed in ALLOWED_HOSTS plus one-per-line entries in allowed_hosts.txt next to this file."""
+    hosts = list(ALLOWED_HOSTS)
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "allowed_hosts.txt")
+    if os.path.exists(p):
+        with open(p, encoding="utf-8") as fh:
+            hosts += [l.strip() for l in fh if l.strip() and not l.lstrip().startswith("#")]
+    return hosts
+
+
 def allowed(url):
     p = urllib.parse.urlparse(url)
-    hosts = [h.strip() for h in os.environ.get("MOTE_NET_HOSTS", "127.0.0.1,localhost").split(",") if h.strip()]
+    hosts = allowed_hosts()
     if p.scheme not in ("http", "https") or not p.hostname:
         raise MoteError(f"GET: only http and https addresses are allowed, got '{url}'")
     if p.hostname not in hosts:
-        raise MoteError(f"GET: host '{p.hostname}' is not allowed. Allowed hosts: {hosts} (set MOTE_NET_HOSTS to change)")
+        raise MoteError(f"GET: host '{p.hostname}' is not allowed. Allowed hosts: {hosts} (list hosts, one per line, in allowed_hosts.txt next to the engine)")
 
 
 def fetch(url, tries=1):

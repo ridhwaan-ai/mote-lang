@@ -7,6 +7,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import mote_app
+import mote_flow
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 tmp = tempfile.mkdtemp()
@@ -29,6 +30,7 @@ class H(BaseHTTPRequestHandler):
 srv = ThreadingHTTPServer(("127.0.0.1", 8798), H)
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 U = "http://127.0.0.1:8798"
+mote_flow.ALLOWED_HOSTS = ["127.0.0.1"]
 bad = 0
 
 
