@@ -7,6 +7,8 @@ One short line instead of a page of Python or SQL, and every change is previewed
 @orders|F(status="paid")|G(country;total=S(amount))|O(-total)|T(3)
 ```
 
+**Demo video (34 s):** https://github.com/ridhwaan-ai/mote-lang/releases/download/v0.1.0/mote-demo-FINAL.mp4
+
 ## Why it exists
 Agents burn tokens (and make mistakes) writing long pandas/SQL code for routine data jobs.
 Mote is short, has clear error messages that tell the agent how to fix the line, and refuses unsafe things by default.
