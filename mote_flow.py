@@ -85,12 +85,22 @@ def allowed(url):
         raise MoteError(f"GET: host '{p.hostname}' is not allowed. Allowed hosts: {hosts} (list hosts, one per line, in allowed_hosts.txt next to the engine)")
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """A redirect could send us to a host that is not on the allowed list, so redirects are never followed."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
 def fetch(url, tries=1):
     allowed(url)
     last = ""
     for i in range(max(1, tries)):
         try:
-            with urllib.request.urlopen(url, timeout=10) as r:
+            with _OPENER.open(url, timeout=10) as r:
                 body = r.read(MAX_BYTES + 1)
             if len(body) > MAX_BYTES:
                 raise MoteError("GET: reply is too large")
@@ -350,7 +360,7 @@ def post_effect(cur, url):
 def do_post(url, body):
     req = urllib.request.Request(url, data=body.encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with _OPENER.open(req, timeout=10) as r:
             return r.status
     except urllib.error.HTTPError as e:
         raise MoteError(f"PT: {url} answered HTTP {e.code}")

@@ -114,6 +114,13 @@ FUNCS = {  # name: (min args, max args, function(args, df))
 }
 
 
+def _whole(x):
+    """True for whole-number values: Python ints and integer columns."""
+    if isinstance(x, (bool, np.bool_)):
+        return False
+    return isinstance(x, (int, np.integer)) or (hasattr(x, "dtype") and pd.api.types.is_integer_dtype(x))
+
+
 def _walk(node, df, used):
     if isinstance(node, ast.Constant):
         if isinstance(node.value, bool) or not isinstance(node.value, (int, float, str)):
@@ -131,6 +138,11 @@ def _walk(node, df, used):
         a = _need_num(_walk(node.left, df, used), "+ - * / % **")
         b = _need_num(_walk(node.right, df, used), "+ - * / % **")
         with np.errstate(all="ignore"):
+            if type(node.op) in (ast.Add, ast.Sub, ast.Mult, ast.Pow) and _whole(a) and _whole(b):
+                # whole numbers are 64-bit: a result that does not fit would silently wrap around, so check in decimals first
+                probe = NUMERIC_BIN[type(node.op)](np.asarray(a, dtype=float), np.asarray(b, dtype=float))
+                if (np.abs(probe) >= 9.2e18).any():
+                    raise MoteError("A: whole-number maths gave a result too large to store (limit about 9.2e18). Write one number with a decimal point, e.g. 2.0, to use decimal maths")
             return NUMERIC_BIN[type(node.op)](a, b)
     if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "fill"
             and not node.keywords):

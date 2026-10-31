@@ -147,6 +147,12 @@ def _mask(groups, df):
     return out
 
 
+def _sum_fits(col, whole, decimal, step):
+    """Whole-number totals are 64-bit and would silently wrap around; compare with the decimal total and stop if they differ."""
+    if pd.api.types.is_integer_dtype(col) and (np.abs(np.asarray(decimal, dtype=float)) >= 9.2e18).any():
+        raise MoteError(f"{step}: the total is too large to store as a whole number (limit about 9.2e18). Use decimal values, e.g. A(x=amt*1.0), first")
+
+
 def _scalar(v):
     return v.item() if hasattr(v, "item") else v
 
@@ -406,6 +412,8 @@ def _step(sym, arg, cur, env, first):
         cols = {}
         for a, name in specs:
             v = g.size() if a[0] == "C" else g[a[1]].agg(G_AGG[a[0]])
+            if a[0] == "S":
+                _sum_fits(cur[a[1]], v, g[a[1]].apply(lambda x: x.astype(float).sum()), "G")
             if a[0] in ("SD", "VR") and v.isna().any():
                 raise MoteError(f"G: {a[0]} needs at least 2 rows in every group")
             if (name or "v") in cols or (name or "v") == key:
@@ -436,6 +444,8 @@ def _step(sym, arg, cur, env, first):
             return _scalar(np.percentile(c, p))
         if sym == "CO":
             return _scalar(c.corr(cur[args[1]]))
+        if sym == "S":
+            _sum_fits(c, c.sum(), c.astype(float).sum(), "S")
         return _scalar({"S": c.sum, "V": c.mean, "X": c.max, "N": c.min, "M": c.median, "SD": c.std, "VR": c.var}[sym]())
     if sym == "R":
         if isinstance(cur, pd.DataFrame) or len(args) != 1:
